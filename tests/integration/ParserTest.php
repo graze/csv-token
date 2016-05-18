@@ -88,7 +88,7 @@ class ParserTest extends TestCase
                 new CsvConfiguration(),
                 '',
                 [],
-                [[]],
+                [],
             ],
             [
                 new CsvConfiguration(),
@@ -105,6 +105,14 @@ class ParserTest extends TestCase
                 [
                     ['한국말'],
                     ['조선말', '한국말'],
+                ],
+            ],
+            [
+                new CsvConfiguration(),
+                '"1","2","3"' . "\n",
+                [],
+                [
+                    ['1', '2', '3'],
                 ],
             ],
         ];
