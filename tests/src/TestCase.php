@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  *
  * @license https://github.com/graze/csv-token/blob/master/LICENSE.md
- * @link https://github.com/graze/csv-token
+ * @link    https://github.com/graze/csv-token
  */
 
 namespace Graze\CsvToken\Test;

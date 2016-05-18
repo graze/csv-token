@@ -90,28 +90,42 @@ class ParserTest extends TestCase
                     ['text\\Nthing', '\\Nstart', 'end\\N', null, '\\N'],
                 ],
             ],
+            [
+                new CsvConfiguration(),
+                "한국말\n조선말,한국말",
+                [],
+                [
+                    ['한국말'],
+                    ['조선말', '한국말'],
+                ],
+            ],
         ];
     }
 
-    public function testParseExceptionOnEscapeAsLastBitOfString()
+    /**
+     * @dataProvider parseExceptionsData
+     *
+     * @param string $csv
+     * @param string $exception
+     */
+    public function testParseExceptions($csv, $exception)
     {
-        $csv = '"string",\\';
         $tokeniser = new StringTokeniser(new CsvConfiguration(), $csv);
         $parser = new Parser();
 
-        static::expectException(RuntimeException::class);
+        static::expectException($exception);
 
         iterator_to_array($parser->parse($tokeniser->getTokens()));
     }
 
-    public function testParserExceptionOnStringOutsideOfQuotes()
+    /**
+     * @return array
+     */
+    public function parseExceptionsData()
     {
-        $csv = '"string"stuff,things';
-        $tokeniser = new StringTokeniser(new CsvConfiguration(), $csv);
-        $parser = new Parser();
-
-        static::expectException(RuntimeException::class);
-
-        iterator_to_array($parser->parse($tokeniser->getTokens()));
+        return [
+            ['"string",\\', RuntimeException::class],
+            ['"string"stuff,things', RuntimeException::class],
+        ];
     }
 }

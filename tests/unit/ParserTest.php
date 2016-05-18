@@ -7,13 +7,12 @@ use Graze\CsvToken\Test\TestCase;
 use Graze\CsvToken\ValueParser\ValueParserInterface;
 use Iterator;
 use Mockery as m;
-use Mockery\MockInterface;
 
 class ParserTest extends TestCase
 {
     public function testConstructorValueParsers()
     {
-        /** @var ValueParserInterface|MockInterface $valueParser */
+        /** @var ValueParserInterface $valueParser */
         $valueParser = m::mock(ValueParserInterface::class);
 
         $parser = new Parser([$valueParser]);
@@ -22,7 +21,7 @@ class ParserTest extends TestCase
 
     public function testAddingAParser()
     {
-        /** @var ValueParserInterface|MockInterface $valueParser */
+        /** @var ValueParserInterface $valueParser */
         $valueParser = m::mock(ValueParserInterface::class);
 
         $parser = new Parser();
@@ -34,7 +33,7 @@ class ParserTest extends TestCase
 
     public function testRemovingAParser()
     {
-        /** @var ValueParserInterface|MockInterface $valueParser */
+        /** @var ValueParserInterface $valueParser */
         $valueParser = m::mock(ValueParserInterface::class);
 
         $parser = new Parser([$valueParser]);
