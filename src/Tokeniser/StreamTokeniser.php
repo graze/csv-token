@@ -31,7 +31,7 @@ class StreamTokeniser implements TokeniserInterface
         uksort($this->types, function ($a, $b) {
             return strlen($b) - strlen($a);
         });
-        $this->maxTypeLength = strlen(reset(array_keys($this->types)));
+        $this->maxTypeLength = count($this->types) > 0 ? strlen(array_keys($this->types)[0]) : 1;
         $this->stream = $stream;
     }
 
