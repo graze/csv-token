@@ -34,7 +34,8 @@ $ composer require graze/csv-token
 ``` php
 $csvDefiniton = new CsvDefinition();
 $parser = new Parser();
-$csvIterator = $parser->parser(new StreamTokeniser($csvDefinition, $stream));
+$tokeniser = new StreamTokeniser($csvDefinition, $stream);
+$csvIterator = $parser->parser($tokens->getTokens());
 ```
 
 ## Change log
