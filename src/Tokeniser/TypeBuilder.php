@@ -9,7 +9,7 @@ trait TypeBuilder
     /**
      * @param CsvConfigurationInterface $config
      *
-     * @return int[]
+     * @return int[] Sorted in order of precedence
      */
     protected function getTypes(CsvConfigurationInterface $config)
     {
@@ -20,7 +20,7 @@ trait TypeBuilder
         ];
 
         if ($config->useDoubleQuotes()) {
-            $types[$config->getQuote() . $config->getQuote()] = Token::T_DOUBLE_QUOTE;
+            $types[str_repeat($config->getQuote(), 2)] = Token::T_DOUBLE_QUOTE;
         }
         $newLines = $config->getNewLine();
         if (!is_array($newLines)) {
@@ -32,6 +32,11 @@ trait TypeBuilder
         if (!is_null($config->getNullValue())) {
             $types[$config->getNullValue()] = Token::T_NULL;
         }
+
+        // sort by reverse key length
+        uksort($types, function ($first, $second) {
+            return strlen($second) - strlen($first);
+        });
 
         return $types;
     }

@@ -38,52 +38,35 @@ class Parser implements ParserInterface
         /** @var Token $token */
         $token = $tokens->current();
         while (!is_null($token)) {
-            switch (true) {
-                case $token->getType() == Token::T_ESCAPE:
-                    $tokens->next();
-                    $token = $tokens->current();
-                    if (is_null($token)) {
-                        throw new RuntimeException(
-                            "Invalid CSV: The csv strings final character is an escape character"
-                        );
-                    }
-                    $value->addContent($token->getContent());
-                    break;
-
-                case ($value->isInQuotes() && $token->getType() == Token::T_DOUBLE_QUOTE):
-                    $value->addContent(substr($token->getContent(), 0, $token->getLength() / 2));
-                    break;
-
-                case $token->getType() == Token::T_QUOTE:
+            switch ($token->getType()) {
+                case Token::T_QUOTE:
                     $value->setInQuotes(!$value->isInQuotes());
                     break;
-
-                case $value->isInQuotes():
+                case Token::T_CONTENT:
                     $value->addContent($token->getContent());
                     break;
-
-                case ($value->isEmpty()
-                    && !$value->isInQuotes()
-                    && !$value->wasQuoted()
-                    && $token->getType() == Token::T_NULL):
-                    $value->addContent($token->getContent());
-                    $value->setIsNull();
+                case Token::T_DOUBLE_QUOTE:
+                    $value->addContent(substr($token->getContent(), 0, $token->getLength() / 2));
                     break;
-
-                case (!$value->isInQuotes() && $token->getType() == Token::T_DELIMITER):
+                case Token::T_NULL:
+                    if ($value->isEmpty() && !$value->isInQuotes() && !$value->wasQuoted()) {
+                        $value->addContent($token->getContent());
+                        $value->setIsNull();
+                    } else {
+                        $value->addContent($token->getContent());
+                    }
+                    break;
+                case Token::T_DELIMITER:
                     $row->append($value->getValue());
                     $value->reset();
                     break;
-
-                case (!$value->isInQuotes() && $token->getType() == Token::T_NEW_LINE):
+                case Token::T_NEW_LINE:
                     $row->append($value->getValue());
                     $value->reset();
                     yield $row;
                     $row = new ArrayIterator();
                     break;
-
                 default:
-                    $value->addContent($token->getContent());
                     break;
             }
 
@@ -92,6 +75,9 @@ class Parser implements ParserInterface
         }
 
         if (!$value->isEmpty()) {
+            if ($value->isInQuotes()) {
+                throw new RuntimeException("Unmatched quote at the end of the csv data");
+            }
             $row->append($value->getValue());
         }
 

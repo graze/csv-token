@@ -41,11 +41,19 @@ class ParserTest extends TestCase
         return [
             [
                 new CsvConfiguration(),
-                '"some",\\N,"new' . "\n" . 'line",with\\' . "\n" . 'escaped,"in\\' . "\n" . 'quotes"',
+                '"some",\\N,"new' . "\n" . 'line",with\\' . "\n" . 'escaped,"in\\' . "\n" . 'quotes","\\\\"',
                 [],
                 [
-                    ['some', null, "new\nline", "with\nescaped", "in\nquotes"],
+                    ['some', null, "new\nline", "with\nescaped", "in\nquotes", '\\'],
                 ],
+            ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
+                ]),
+                '"end""","""start","""both""","",""""',
+                [],
+                [['end"', '"start', '"both"', '', '"']],
             ],
             [
                 new CsvConfiguration([
@@ -87,7 +95,7 @@ class ParserTest extends TestCase
                 'text\\Nthing,\\Nstart,end\\N,\\N,"\\N"',
                 [],
                 [
-                    ['text\\Nthing', '\\Nstart', 'end\\N', null, '\\N'],
+                    ['text\\Nthing', '\\Nstart', 'end\\N', null, 'N'],
                 ],
             ],
             [
@@ -124,8 +132,8 @@ class ParserTest extends TestCase
     public function parseExceptionsData()
     {
         return [
-            ['"string",\\', RuntimeException::class],
-            ['"string"stuff,things', RuntimeException::class],
+            ['"string"stuff,things', RuntimeException::class], // extra text after a closing quote
+            ['"string', RuntimeException::class], // no closing quote
         ];
     }
 }
