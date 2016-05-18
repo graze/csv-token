@@ -31,7 +31,8 @@ class StreamTokeniserTest extends TestCase
 
         static::assertEquals($tokens, $tokensOnly);
 
-        for ($i = 1; $i < count($actual); $i++) {
+        $count = count($actual);
+        for ($i = 1; $i < $count; $i++) {
             static::assertEquals(
                 $actual[$i]->getPosition(),
                 $actual[$i - 1]->getPosition() + $actual[$i - 1]->getLength(),
