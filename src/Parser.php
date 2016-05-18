@@ -81,7 +81,9 @@ class Parser implements ParserInterface
             $row->append($value->getValue());
         }
 
-        yield new ArrayIterator($row);
+        if ($row->count() > 0) {
+            yield $row;
+        }
     }
 
     /**
