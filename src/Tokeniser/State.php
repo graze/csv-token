@@ -2,6 +2,8 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use RuntimeException;
+
 class State
 {
     const S_ANY             = 0;
@@ -30,14 +32,6 @@ class State
     }
 
     /**
-     * @return int[]
-     */
-    public function getTypes()
-    {
-        return $this->types;
-    }
-
-    /**
      * @param int $token
      *
      * @return State|null
@@ -50,7 +44,7 @@ class State
             }
         }
 
-        return null;
+        throw new RuntimeException("The supplied token: {$token} has no target state");
     }
 
     /**

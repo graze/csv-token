@@ -125,7 +125,7 @@ class StreamTokeniserTest extends TestCase
             ],
             [
                 new CsvConfiguration(),
-                '"some",test,"with \" escape"',
+                '"some",test,"with \" escape","\\\\"',
                 [
                     [Token::T_QUOTE, '"'],
                     [Token::T_CONTENT, 'some'],
@@ -137,6 +137,11 @@ class StreamTokeniserTest extends TestCase
                     [Token::T_CONTENT, 'with '],
                     [Token::T_ESCAPE, '\\'],
                     [Token::T_CONTENT, '" escape'],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_ESCAPE, '\\'],
+                    [Token::T_CONTENT, '\\'],
                     [Token::T_QUOTE, '"'],
                 ],
             ],

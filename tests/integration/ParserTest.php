@@ -41,10 +41,10 @@ class ParserTest extends TestCase
         return [
             [
                 new CsvConfiguration(),
-                '"some",\\N,"new' . "\n" . 'line",with\\' . "\n" . 'escaped,"in\\' . "\n" . 'quotes"',
+                '"some",\\N,"new' . "\n" . 'line",with\\' . "\n" . 'escaped,"in\\' . "\n" . 'quotes","\\\\"',
                 [],
                 [
-                    ['some', null, "new\nline", "with\nescaped", "in\nquotes"],
+                    ['some', null, "new\nline", "with\nescaped", "in\nquotes", '\\'],
                 ],
             ],
             [
