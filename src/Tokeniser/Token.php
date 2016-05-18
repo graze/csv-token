@@ -18,6 +18,8 @@ class Token
     private $content;
     /** @var int */
     private $position;
+    /** @var int */
+    private $length;
 
     /**
      * Token constructor.

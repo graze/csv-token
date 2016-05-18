@@ -4,7 +4,8 @@ DOCKER ?= $(shell which docker)
 DOCKER_REPOSITORY := graze/csv-token
 VOLUME := /opt/graze/csv-token
 VOLUME_MAP := -v $$(pwd):${VOLUME}
-DOCKER_RUN := ${DOCKER} run --rm -t ${VOLUME_MAP} ${DOCKER_REPOSITORY}:latest
+DOCKER_RUN_BASE := ${DOCKER} run --rm -t ${VOLUME_MAP} -w ${VOLUME}
+DOCKER_RUN := ${DOCKER_RUN_BASE} ${DOCKER_REPOSITORY}:latest
 
 .PHONY: install composer clean help
 .PHONY: test lint lint-fix test-unit test-integration test-matrix test-coverage test-coverage-html test-coverage-clover
@@ -43,12 +44,9 @@ test-unit: ## Run the unit testsuite.
 	$(DOCKER_RUN) vendor/bin/phpunit --colors=always --testsuite unit
 
 test-matrix: ## Run the unit tests against multiple targets.
-	${DOCKER} run --rm -t ${VOLUME_MAP} -w ${VOLUME} php:5.6-cli \
-    vendor/bin/phpunit --testsuite unit
-	${DOCKER} run --rm -t ${VOLUME_MAP} -w ${VOLUME} php:7.0-cli \
-    vendor/bin/phpunit --testsuite unit
-	${DOCKER} run --rm -t ${VOLUME_MAP} -w ${VOLUME} diegomarangoni/hhvm:cli \
-    vendor/bin/phpunit --testsuite unit
+	make DOCKER_RUN="${DOCKER_RUN_BASE} php:5.6-cli" test
+	make DOCKER_RUN="${DOCKER_RUN_BASE} php:7.0-cli" test
+	make DOCKER_RUN="${DOCKER_RUN_BASE} diegomarangoni/hhvm:cli" test
 
 test-integration: ## Run the integration testsuite.
 	$(DOCKER_RUN) vendor/bin/phpunit --colors=always --testsuite integration

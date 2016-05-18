@@ -26,9 +26,12 @@ class StreamTokeniser implements TokeniserInterface
     public function __construct(CsvConfigurationInterface $config, StreamInterface $stream)
     {
         $this->types = $this->getTypes($config);
-        $this->maxTypeLength = array_reduce(array_keys($this->types), function ($orig, $type) {
-            return max(strlen($type), $orig);
-        }, 0);
+
+        // sort by reverse key length
+        uksort($this->types, function ($a, $b) {
+            return strlen($b) - strlen($a);
+        });
+        $this->maxTypeLength = strlen(reset(array_keys($this->types)));
         $this->stream = $stream;
     }
 
@@ -81,20 +84,12 @@ class StreamTokeniser implements TokeniserInterface
      */
     private function match($position, $buffer)
     {
-        $matches = [];
         foreach ($this->types as $search => $tokenType) {
             if (substr($buffer, 0, strlen($search)) == $search) {
-                if (!isset($matches[strlen($search)])) {
-                    $matches[strlen($search)] = new Token($tokenType, $search, $position);
-                }
+                return new Token($tokenType, $search, $position);
             }
         }
 
-        if (count($matches) !== 0) {
-            krsort($matches);
-            return reset($matches);
-        } else {
-            return new Token(Token::T_CONTENT, $buffer[0], $position);
-        }
+        return new Token(Token::T_CONTENT, $buffer[0], $position);
     }
 }

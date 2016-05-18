@@ -84,10 +84,10 @@ class ParserTest extends TestCase
             ],
             [
                 new CsvConfiguration(),
-                'text\\Nthing,\\Nstart,end\\N,\\N',
+                'text\\Nthing,\\Nstart,end\\N,\\N,"\\N"',
                 [],
                 [
-                    ['text\\Nthing', '\\Nstart', 'end\\N', null],
+                    ['text\\Nthing', '\\Nstart', 'end\\N', null, '\\N'],
                 ],
             ],
         ];

@@ -13,9 +13,12 @@ trait TypeBuilder
      */
     protected function getTypes(CsvConfigurationInterface $config)
     {
-        $types[$config->getDelimiter()] = Token::T_DELIMITER;
-        $types[$config->getQuote()] = Token::T_QUOTE;
-        $types[$config->getEscape()] = Token::T_ESCAPE;
+        $types = [
+            $config->getDelimiter() => Token::T_DELIMITER,
+            $config->getQuote()     => Token::T_QUOTE,
+            $config->getEscape()    => Token::T_ESCAPE,
+        ];
+
         if ($config->useDoubleQuotes()) {
             $types[$config->getQuote() . $config->getQuote()] = Token::T_DOUBLE_QUOTE;
         }

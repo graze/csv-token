@@ -34,6 +34,7 @@ class Parser implements ParserInterface
         $value = new Value($this->valueParsers);
         $row = new ArrayIterator();
 
+        $tokens->rewind();
         /** @var Token $token */
         $token = $tokens->current();
         while (!is_null($token)) {
@@ -61,13 +62,12 @@ class Parser implements ParserInterface
                     $value->addContent($token->getContent());
                     break;
 
-                case (!$value->isInQuotes() && !$value->wasQuoted() && $token->getType() == Token::T_NULL):
-                    if ($value->isEmpty()) {
-                        $value->addContent($token->getContent());
-                        $value->setIsNull();
-                    } else {
-                        $value->addContent($token->getContent());
-                    }
+                case ($value->isEmpty()
+                    && !$value->isInQuotes()
+                    && !$value->wasQuoted()
+                    && $token->getType() == Token::T_NULL):
+                    $value->addContent($token->getContent());
+                    $value->setIsNull();
                     break;
 
                 case (!$value->isInQuotes() && $token->getType() == Token::T_DELIMITER):
