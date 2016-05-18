@@ -132,7 +132,8 @@ class ParserTest extends TestCase
     public function parseExceptionsData()
     {
         return [
-            ['"string"stuff,things', RuntimeException::class],
+            ['"string"stuff,things', RuntimeException::class], // extra text after a closing quote
+            ['"string', RuntimeException::class], // no closing quote
         ];
     }
 }

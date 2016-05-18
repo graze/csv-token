@@ -41,16 +41,3 @@ trait TypeBuilder
         return $types;
     }
 }
-
-// state type matcher:
-
-// states:
-//      S_ALL: T_ALL
-//      S_IN_QUOTE: T_CONTENT, T_DOUBLE_QUOTE, T_ESCAPE, T_QUOTE
-//      S_ESCAPE: T_CONTENT
-
-// state migration:
-//  S_ALL & !(T_ESCAPE | T_QUOTE) => S_ALL
-//  S_ALL | S_IN_QUOTE & T_ESCAPE => S_ESCAPE
-//  S_ALL & T_QUOTE => S_IN_QUOTE
-//  S_IN_QUOTE & T_QUOTE => S_ALL

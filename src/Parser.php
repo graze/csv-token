@@ -7,6 +7,7 @@ use Graze\CsvToken\Tokeniser\Token;
 use Graze\CsvToken\ValueParser\Value;
 use Graze\CsvToken\ValueParser\ValueParserInterface;
 use Iterator;
+use RuntimeException;
 
 class Parser implements ParserInterface
 {
@@ -74,6 +75,9 @@ class Parser implements ParserInterface
         }
 
         if (!$value->isEmpty()) {
+            if ($value->isInQuotes()) {
+                throw new RuntimeException("Unmatched quote at the end of the csv data");
+            }
             $row->append($value->getValue());
         }
 
