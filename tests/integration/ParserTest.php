@@ -49,6 +49,14 @@ class ParserTest extends TestCase
             ],
             [
                 new CsvConfiguration([
+                    CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
+                ]),
+                '"end""","""start","""both""","",""""',
+                [],
+                [['end"', '"start', '"both"', '', '"']],
+            ],
+            [
+                new CsvConfiguration([
                     CsvConfiguration::OPTION_DELIMITER    => '|',
                     CsvConfiguration::OPTION_QUOTE        => "'",
                     CsvConfiguration::OPTION_ESCAPE       => '\\',
@@ -87,7 +95,7 @@ class ParserTest extends TestCase
                 'text\\Nthing,\\Nstart,end\\N,\\N,"\\N"',
                 [],
                 [
-                    ['text\\Nthing', '\\Nstart', 'end\\N', null, '\\N'],
+                    ['text\\Nthing', '\\Nstart', 'end\\N', null, 'N'],
                 ],
             ],
             [
@@ -124,7 +132,6 @@ class ParserTest extends TestCase
     public function parseExceptionsData()
     {
         return [
-            ['"string",\\', RuntimeException::class],
             ['"string"stuff,things', RuntimeException::class],
         ];
     }

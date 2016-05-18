@@ -6,11 +6,12 @@ class Token
 {
     const T_CONTENT      = 1;
     const T_DELIMITER    = 2;
-    const T_NEW_LINE     = 3;
-    const T_QUOTE        = 4;
-    const T_NULL         = 5;
-    const T_ESCAPE       = 6;
-    const T_DOUBLE_QUOTE = 7;
+    const T_NEW_LINE     = 4;
+    const T_QUOTE        = 8;
+    const T_NULL         = 16;
+    const T_ESCAPE       = 32;
+    const T_DOUBLE_QUOTE = 128;
+    const T_ANY          = 255;
 
     /** @var int */
     private $type;

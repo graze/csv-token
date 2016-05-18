@@ -47,6 +47,7 @@ class ParserTest extends TestCase
     {
         $parser = new Parser();
 
+        /** @var Iterator $tokens */
         $tokens = m::mock(Iterator::class);
 
         $output = $parser->parse($tokens);
