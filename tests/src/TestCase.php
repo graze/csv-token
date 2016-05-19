@@ -1,7 +1,6 @@
 <?php
-
 /**
- * This file is part of graze/csv-token.
+ * This file is part of graze/csv-token
  *
  * Copyright (c) 2016 Nature Delivered Ltd. <https://www.graze.com>
  *
