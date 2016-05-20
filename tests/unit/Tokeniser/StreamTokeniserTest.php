@@ -256,6 +256,38 @@ class StreamTokeniserTest extends TestCase
                     [Token::T_QUOTE, '"'],
                 ],
             ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_QUOTE => '',
+                ]),
+                'text,stuff"and,things',
+                [
+                    [Token::T_CONTENT, 'text'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_CONTENT, 'stuff"and'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_CONTENT, 'things'],
+                ],
+            ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_ESCAPE => '',
+                ]),
+                '"some","text,","here\\"',
+                [
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'some'],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'text,'],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'here\\'],
+                    [Token::T_QUOTE, '"'],
+                ],
+            ],
         ];
     }
 }

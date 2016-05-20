@@ -26,9 +26,14 @@ trait TypeBuilder
     {
         $types = [
             $config->getDelimiter() => Token::T_DELIMITER,
-            $config->getQuote()     => Token::T_QUOTE,
-            $config->getEscape()    => Token::T_ESCAPE,
         ];
+
+        if ($config->getQuote() != '') {
+            $types[$config->getQuote()] = Token::T_QUOTE;
+        }
+        if ($config->getEscape() != '') {
+            $types[$config->getEscape()] = Token::T_ESCAPE;
+        }
 
         if ($config->useDoubleQuotes()) {
             $types[str_repeat($config->getQuote(), 2)] = Token::T_DOUBLE_QUOTE;
