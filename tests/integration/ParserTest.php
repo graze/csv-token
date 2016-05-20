@@ -126,6 +126,27 @@ class ParserTest extends TestCase
                     ['1', '2', '3'],
                 ],
             ],
+            [ // no quote and double quote should do nothing
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_QUOTE        => '',
+                    CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
+                ]),
+                'text,things"here,and\,here',
+                [],
+                [
+                    ['text', 'things"here', 'and,here'],
+                ],
+            ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_ESCAPE => '',
+                ]),
+                '"text","here","and\,here"',
+                [],
+                [
+                    ['text', 'here', 'and\,here'],
+                ],
+            ],
         ];
     }
 
