@@ -17,17 +17,9 @@ class CsvConfiguration implements CsvConfigurationInterface
 {
     const DEFAULT_DELIMITER    = ',';
     const DEFAULT_NULL         = '\\N';
-    const DEFAULT_NEW_LINES    = ["\n", "\r", "\r\n"];
     const DEFAULT_QUOTE        = '"';
     const DEFAULT_ESCAPE       = '\\';
     const DEFAULT_DOUBLE_QUOTE = false;
-    const DEFAULT_BOMS         = [
-        Bom::BOM_UTF8,
-        Bom::BOM_UTF16_BE,
-        Bom::BOM_UTF16_LE,
-        Bom::BOM_UTF32_BE,
-        Bom::BOM_UTF32_LE,
-    ];
     const DEFAULT_ENCODING     = 'UTF-8';
 
     const OPTION_DELIMITER    = 'delimiter';
@@ -76,9 +68,15 @@ class CsvConfiguration implements CsvConfigurationInterface
         $this->quote = $this->getOption($options, static::OPTION_QUOTE, static::DEFAULT_QUOTE);
         $this->escape = $this->getOption($options, static::OPTION_ESCAPE, static::DEFAULT_ESCAPE);
         $this->doubleQuotes = $this->getOption($options, static::OPTION_DOUBLE_QUOTE, static::DEFAULT_DOUBLE_QUOTE);
-        $this->newLines = $this->getOption($options, static::OPTION_NEW_LINES, static::DEFAULT_NEW_LINES);
+        $this->newLines = $this->getOption($options, static::OPTION_NEW_LINES, ["\n", "\r", "\r\n"]);
         $this->null = $this->getOption($options, static::OPTION_NULL, static::DEFAULT_NULL);
-        $this->boms = $this->getOption($options, static::OPTION_BOMS, static::DEFAULT_BOMS);
+        $this->boms = $this->getOption($options, static::OPTION_BOMS, [
+            Bom::BOM_UTF8,
+            Bom::BOM_UTF16_BE,
+            Bom::BOM_UTF16_LE,
+            Bom::BOM_UTF32_BE,
+            Bom::BOM_UTF32_LE,
+        ]);
         $this->encoding = $this->getOption($options, static::OPTION_ENCODING, static::DEFAULT_ENCODING);
     }
 
