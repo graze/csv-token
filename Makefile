@@ -28,7 +28,6 @@ composer-%: ## Run a composer command, `make "composer-<command> [...]"`.
 clean: ## Clean up any images.
 	$(DOCKER) rmi ${DOCKER_REPOSITORY}:latest
 
-
 # Testing
 
 test: ## Run the unit and integration testsuites.

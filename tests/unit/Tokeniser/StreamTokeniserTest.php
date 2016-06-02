@@ -13,11 +13,12 @@
 
 namespace Graze\CsvToken\Test\Unit;
 
+use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfiguration;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
 use Graze\CsvToken\Test\TestCase;
 use Graze\CsvToken\Tokeniser\StreamTokeniser;
-use Graze\CsvToken\Tokeniser\Token;
+use Graze\CsvToken\Tokeniser\Token\Token;
 use GuzzleHttp\Psr7\Stream;
 
 class StreamTokeniserTest extends TestCase
@@ -288,6 +289,81 @@ class StreamTokeniserTest extends TestCase
                     [Token::T_QUOTE, '"'],
                 ],
             ],
+            [
+                new CsvConfiguration(),
+                "\xEF\xBB\xBF" . mb_convert_encoding('"some","text","here"', 'utf8'),
+                [
+                    [Token::T_BOM, "\xEF\xBB\xBF"],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'some'],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'text'],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_DELIMITER, ','],
+                    [Token::T_QUOTE, '"'],
+                    [Token::T_CONTENT, 'here'],
+                    [Token::T_QUOTE, '"'],
+                ],
+            ],
+            [
+                new CsvConfiguration(),
+                Bom::BOM_UTF32_BE . mb_convert_encoding('"some","text","here"', 'UTF-32BE'),
+                [
+                    [Token::T_BOM, "\x00\x00\xFE\xFF"],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('some', 'UTF-32BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-32BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('text', 'UTF-32BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-32BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('here', 'UTF-32BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-32BE')],
+                ],
+            ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_ENCODING => 'UTF-16'
+                ]),
+                mb_convert_encoding('"sõme","tēxt","hêre"', 'UTF-16'),
+                [
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                    [Token::T_CONTENT, mb_convert_encoding('sõme', 'UTF-16')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-16')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                    [Token::T_CONTENT, mb_convert_encoding('tēxt', 'UTF-16')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-16')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                    [Token::T_CONTENT, mb_convert_encoding('hêre', 'UTF-16')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
+                ]
+            ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_BOM => Bom::BOM_UTF16_BE
+                ]),
+                Bom::BOM_UTF16_BE . mb_convert_encoding('"sõme","tēxt","hêre"', 'UTF-16BE'),
+                [
+                    [Token::T_BOM, Bom::BOM_UTF16_BE],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('sõme', 'UTF-16BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-16BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('tēxt', 'UTF-16BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                    [Token::T_DELIMITER, mb_convert_encoding(',', 'UTF-16BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                    [Token::T_CONTENT, mb_convert_encoding('hêre', 'UTF-16BE')],
+                    [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
+                ]
+            ]
         ];
     }
 }

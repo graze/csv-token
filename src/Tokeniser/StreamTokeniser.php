@@ -13,13 +13,15 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
+use Graze\CsvToken\Tokeniser\Token\Token;
+use Graze\CsvToken\Tokeniser\Token\TokenStore;
 use Iterator;
 use Psr\Http\Message\StreamInterface;
 
 class StreamTokeniser implements TokeniserInterface
 {
-    use TypeBuilder;
     use StateBuilder;
 
     /** @var int */
@@ -28,6 +30,8 @@ class StreamTokeniser implements TokeniserInterface
     private $stream;
     /** @var State */
     private $state;
+    /** @var TokenStore */
+    private $tokenStore;
 
     /**
      * Tokeniser constructor.
@@ -37,8 +41,9 @@ class StreamTokeniser implements TokeniserInterface
      */
     public function __construct(CsvConfigurationInterface $config, StreamInterface $stream)
     {
-        $types = $this->getTypes($config);
-        $this->state = $this->buildStates($types);
+        $this->tokenStore = new TokenStore($config);
+        $this->state = $this->buildStates($this->tokenStore);
+        $types = $this->tokenStore->getTokens();
         $this->maxTypeLength = count($types) > 0 ? strlen(array_keys($types)[0]) : 1;
         $this->stream = $stream;
     }
@@ -60,6 +65,11 @@ class StreamTokeniser implements TokeniserInterface
 
         while (strlen($buffer) > 0) {
             $token = $this->state->match($position, $buffer);
+
+            if ($token->getType() == Token::T_BOM) {
+                $this->changeEncoding($token);
+            }
+
             $this->state = $this->state->getNextState($token->getType());
 
             $len = $token->getLength();
@@ -84,5 +94,13 @@ class StreamTokeniser implements TokeniserInterface
         }
 
         $this->stream->close();
+    }
+
+    /**
+     * @param Token $token
+     */
+    private function changeEncoding(Token $token)
+    {
+        $this->tokenStore->setEncoding(Bom::getEncoding($token->getContent()));
     }
 }

@@ -11,15 +11,16 @@ Tokenised Csv Reader that handles some of the strange configurations databases a
 
 - Parses tokens and csv from streams and outputs using a Lazy Iterator
 
-| Csv Feature                | Example                  | Array                         |
-|----------------------------|--------------------------|-------------------------------|
-| Delimiter                  | `thing|other`            | `['thing','other']`           |
-| Quote Enclosure            | `"quote, here",not here` | `['quote, here', 'not here']` |
-| Escaping                   | `"\"text","new\\nline"`  | `['"text',"new\\\nline"]`     |
-| Double Quotes and Escaping | `"""text","\, text"`     | `['"text',', text']`          |
-| Null value parsing         | `"text",\\N,"text"`      | `['text',null,'text']`        |
-| Boolean value parsing      | `"text",false,true`      | `['text',false,true]`         |
-| Numeric value parsing      | `"text",1,-2.3,3.1e-24`  | `['text',1,-2.3,3.1e-24]`     |
+| Csv Feature                  | Example                    | Array                         |
+|------------------------------|----------------------------|-------------------------------|
+| Delimiter                    | `thing|other`              | `['thing','other']`           |
+| Quote Enclosure              | `"quote, here",not here`   | `['quote, here', 'not here']` |
+| Escaping                     | `"\"text","new\\nline"`    | `['"text',"new\\\nline"]`     |
+| Double Quotes and Escaping   | `"""text","\, text"`       | `['"text',', text']`          |
+| Null value parsing           | `"text",\\N,"text"`        | `['text',null,'text']`        |
+| Boolean value parsing        | `"text",false,true`        | `['text',false,true]`         |
+| Numeric value parsing        | `"text",1,-2.3,3.1e-24`    | `['text',1,-2.3,3.1e-24]`     |
+| Handling of Byte Order Marks | `<UTF8BOM>"text","things"` | `['text','things']`           |
 
 ## Install
 
@@ -35,7 +36,7 @@ $ composer require graze/csv-token
 $csvDefiniton = new CsvDefinition();
 $parser = new Parser();
 $tokeniser = new StreamTokeniser($csvDefinition, $stream);
-$csvIterator = $parser->parser($tokens->getTokens());
+$csvIterator = $parser->parser($tokeniser->getTokens());
 ```
 
 ## Change log

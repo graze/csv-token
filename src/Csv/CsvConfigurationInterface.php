@@ -44,4 +44,14 @@ interface CsvConfigurationInterface
      * @return string
      */
     public function getNullValue();
+
+    /**
+     * @return string|null
+     */
+    public function getBom();
+
+    /**
+     * @return string
+     */
+    public function getEncoding();
 }

@@ -13,25 +13,27 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Tokeniser\Token\Token;
+use Graze\CsvToken\Tokeniser\Token\TokenStoreInterface;
+
 trait StateBuilder
 {
     /**
-     * @param array $types
+     * @param TokenStoreInterface $tokenStore
      *
      * @return State The default starting state
      */
-    public function buildStates(array $types)
+    public function buildStates(TokenStoreInterface $tokenStore)
     {
-        $getTypes = function ($tokenMask) use ($types) {
-            return array_filter($types, function ($type) use ($tokenMask) {
-                return $type & $tokenMask;
-            });
-        };
+        $initial = new State($tokenStore, State::S_INITIAL_TOKENS);
+        $any = new State($tokenStore, State::S_ANY_TOKENS);
+        $inQuote = new State($tokenStore, State::S_IN_QUOTE_TOKENS);
+        $inEscape = new State($tokenStore, State::S_IN_ESCAPE_TOKENS);
+        $inQuoteEscape = new State($tokenStore, State::S_IN_QUOTE_ESCAPE_TOKENS);
 
-        $any = new State($getTypes(State::S_ANY_TOKENS));
-        $inQuote = new State($getTypes(State::S_IN_QUOTE_TOKENS));
-        $inEscape = new State($getTypes(State::S_IN_ESCAPE_TOKENS));
-        $inQuoteEscape = new State($getTypes(State::S_IN_QUOTE_ESCAPE_TOKENS));
+        $initial->addStateTarget(Token::T_ANY & ~Token::T_QUOTE & ~Token::T_ESCAPE, $any);
+        $initial->addStateTarget(Token::T_QUOTE, $inQuote);
+        $initial->addStateTarget(Token::T_ESCAPE, $inEscape);
 
         // generate state mapping
         $any->addStateTarget(Token::T_ANY & ~Token::T_QUOTE & ~Token::T_ESCAPE, $any);
@@ -46,6 +48,6 @@ trait StateBuilder
 
         $inQuoteEscape->addStateTarget(Token::T_CONTENT, $inQuote);
 
-        return $any;
+        return $initial;
     }
 }

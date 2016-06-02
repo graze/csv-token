@@ -36,6 +36,8 @@ class CsvConfigurationTest extends TestCase
         static::assertEquals("\n", $definition->getNewLine(), "Line terminator should be '\\n'");
         static::assertEquals('\\', $definition->getEscape(), "Default escape character should be '\\'");
         static::assertEquals(false, $definition->useDoubleQuotes(), "Double quote should be off by default");
+        static::assertEquals(null, $definition->getBom(), "By default BOM should be set to null");
+        static::assertEquals('UTF-8', $definition->getEncoding(), "Default encoding should be 'UTF-8'");
     }
 
     public function testAssigningOptionsModifiesTheDefinition()

@@ -21,6 +21,8 @@ class CsvConfiguration implements CsvConfigurationInterface
     const DEFAULT_QUOTE        = '"';
     const DEFAULT_ESCAPE       = '\\';
     const DEFAULT_DOUBLE_QUOTE = false;
+    const DEFAULT_BOM          = null;
+    const DEFAULT_ENCODING     = 'UTF-8';
 
     const OPTION_DELIMITER    = 'delimiter';
     const OPTION_NULL         = 'null';
@@ -28,6 +30,8 @@ class CsvConfiguration implements CsvConfigurationInterface
     const OPTION_QUOTE        = 'quote';
     const OPTION_ESCAPE       = 'escape';
     const OPTION_DOUBLE_QUOTE = 'doubleQuote';
+    const OPTION_BOM          = 'bom';
+    const OPTION_ENCODING     = 'encoding';
 
     /** @var string */
     private $delimiter;
@@ -41,6 +45,10 @@ class CsvConfiguration implements CsvConfigurationInterface
     private $newLine;
     /** @var string */
     private $null;
+    /** @var string|null */
+    private $bom;
+    /** @var string */
+    private $encoding;
 
     /**
      * CsvConfiguration constructor.
@@ -52,6 +60,8 @@ class CsvConfiguration implements CsvConfigurationInterface
      *                       <p> `doubleQuotes` string (Default: `false`)
      *                       <p> `newLine`      string|array (Default: `PHP_EOL`)
      *                       <p> `null`         string (Default: `'\\N'`)
+     *                       <p> `bom`          string (Default: `null`)
+     *                       <p> `encoding`     string (Default: `'UTF-8'`)
      */
     public function __construct(array $options = [])
     {
@@ -61,6 +71,8 @@ class CsvConfiguration implements CsvConfigurationInterface
         $this->doubleQuotes = $this->getOption($options, static::OPTION_DOUBLE_QUOTE, static::DEFAULT_DOUBLE_QUOTE);
         $this->newLine = $this->getOption($options, static::OPTION_NEW_LINE, static::DEFAULT_NEW_LINE);
         $this->null = $this->getOption($options, static::OPTION_NULL, static::DEFAULT_NULL);
+        $this->bom = $this->getOption($options, static::OPTION_BOM, static::DEFAULT_BOM);
+        $this->encoding = $this->getOption($options, static::OPTION_ENCODING, static::DEFAULT_ENCODING);
     }
 
     /**
@@ -125,5 +137,21 @@ class CsvConfiguration implements CsvConfigurationInterface
     public function getNullValue()
     {
         return $this->null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBom()
+    {
+        return $this->bom;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncoding()
+    {
+        return $this->encoding;
     }
 }
