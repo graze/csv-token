@@ -13,6 +13,8 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Tokeniser\Token\Token;
+use Graze\CsvToken\Tokeniser\Token\TokenStoreInterface;
 use RuntimeException;
 
 class State
@@ -21,25 +23,33 @@ class State
     const S_IN_QUOTE        = 1;
     const S_IN_ESCAPE       = 2;
     const S_IN_QUOTE_ESCAPE = 4;
+    const S_INITIAL         = 5;
 
-    const S_ANY_TOKENS             = Token::T_ANY & ~Token::T_DOUBLE_QUOTE;
+    const S_INITIAL_TOKENS         = Token::T_ANY & ~Token::T_DOUBLE_QUOTE;
+    const S_ANY_TOKENS             = Token::T_ANY & ~Token::T_DOUBLE_QUOTE & ~Token::T_BOM;
     const S_IN_QUOTE_TOKENS        = Token::T_CONTENT | Token::T_QUOTE | Token::T_DOUBLE_QUOTE | Token::T_ESCAPE;
     const S_IN_ESCAPE_TOKENS       = Token::T_CONTENT;
     const S_IN_QUOTE_ESCAPE_TOKENS = Token::T_CONTENT;
 
-    /** @var array */
-    private $types;
     /** @var State[] */
     private $states;
+    /** @var TokenStoreInterface */
+    private $tokens;
+    /**
+     * @var int
+     */
+    private $tokenMask;
 
     /**
      * State constructor.
      *
-     * @param array $types
+     * @param TokenStoreInterface $tokens
+     * @param int                 $tokenMask
      */
-    public function __construct(array $types)
+    public function __construct(TokenStoreInterface $tokens, $tokenMask = Token::T_ANY)
     {
-        $this->types = $types;
+        $this->tokens = $tokens;
+        $this->tokenMask = $tokenMask;
     }
 
     /**
@@ -75,7 +85,7 @@ class State
      */
     public function match($position, $buffer)
     {
-        foreach ($this->types as $search => $tokenType) {
+        foreach ($this->tokens->getTokens($this->tokenMask) as $search => $tokenType) {
             if (substr($buffer, 0, strlen($search)) == $search) {
                 return new Token($tokenType, $search, $position);
             }

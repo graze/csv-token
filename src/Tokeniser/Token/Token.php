@@ -11,7 +11,7 @@
  * @link    https://github.com/graze/csv-token
  */
 
-namespace Graze\CsvToken\Tokeniser;
+namespace Graze\CsvToken\Tokeniser\Token;
 
 class Token
 {
@@ -22,7 +22,8 @@ class Token
     const T_NULL         = 16;
     const T_ESCAPE       = 32;
     const T_DOUBLE_QUOTE = 128;
-    const T_ANY          = 255;
+    const T_BOM          = 256;
+    const T_ANY          = 511;
 
     /** @var int */
     private $type;

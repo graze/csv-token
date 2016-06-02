@@ -14,7 +14,7 @@
 namespace Graze\CsvToken;
 
 use ArrayIterator;
-use Graze\CsvToken\Tokeniser\Token;
+use Graze\CsvToken\Tokeniser\Token\Token;
 use Graze\CsvToken\ValueParser\Value;
 use Graze\CsvToken\ValueParser\ValueParserInterface;
 use Iterator;
