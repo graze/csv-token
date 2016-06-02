@@ -17,6 +17,7 @@ use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfiguration;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
 use Graze\CsvToken\Test\TestCase;
+use InvalidArgumentException;
 
 class CsvConfigurationTest extends TestCase
 {
@@ -76,5 +77,21 @@ class CsvConfigurationTest extends TestCase
         static::assertEquals(true, $definition->useDoubleQuotes(), 'double quote should be on');
         static::assertEquals('UTF-16LE', $definition->getEncoding(), "encoding should be 'UTF-16LE'");
         static::assertEquals([Bom::BOM_UTF16_LE], $definition->getBoms(), "Boms should be [Bom::BOM_UTF16_LE]");
+    }
+
+    public function testNewLinesInTheWrongFormatWillThrowAnException()
+    {
+        static::expectException(InvalidArgumentException::class);
+        new CsvConfiguration([
+            'newLines' => '---',
+        ]);
+    }
+
+    public function testBomsInTheWrongFormatWillThrowAnException()
+    {
+        static::expectException(InvalidArgumentException::class);
+        new CsvConfiguration([
+            'boms' => '',
+        ]);
     }
 }

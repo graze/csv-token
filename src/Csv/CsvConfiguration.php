@@ -13,6 +13,8 @@
 
 namespace Graze\CsvToken\Csv;
 
+use InvalidArgumentException;
+
 class CsvConfiguration implements CsvConfigurationInterface
 {
     const DEFAULT_DELIMITER    = ',';
@@ -68,32 +70,52 @@ class CsvConfiguration implements CsvConfigurationInterface
         $this->quote = $this->getOption($options, static::OPTION_QUOTE, static::DEFAULT_QUOTE);
         $this->escape = $this->getOption($options, static::OPTION_ESCAPE, static::DEFAULT_ESCAPE);
         $this->doubleQuotes = $this->getOption($options, static::OPTION_DOUBLE_QUOTE, static::DEFAULT_DOUBLE_QUOTE);
-        $this->newLines = $this->getOption($options, static::OPTION_NEW_LINES, ["\n", "\r", "\r\n"]);
         $this->null = $this->getOption($options, static::OPTION_NULL, static::DEFAULT_NULL);
-        $this->boms = $this->getOption($options, static::OPTION_BOMS, [
-            Bom::BOM_UTF8,
-            Bom::BOM_UTF16_BE,
-            Bom::BOM_UTF16_LE,
-            Bom::BOM_UTF32_BE,
-            Bom::BOM_UTF32_LE,
-        ]);
         $this->encoding = $this->getOption($options, static::OPTION_ENCODING, static::DEFAULT_ENCODING);
+        $this->newLines = (array) $this->getOption(
+            $options,
+            static::OPTION_NEW_LINES,
+            ["\n", "\r", "\r\n"],
+            'is_array'
+        );
+        $this->boms = (array) $this->getOption(
+            $options,
+            static::OPTION_BOMS,
+            [
+                Bom::BOM_UTF8,
+                Bom::BOM_UTF16_BE,
+                Bom::BOM_UTF16_LE,
+                Bom::BOM_UTF32_BE,
+                Bom::BOM_UTF32_LE,
+            ],
+            'is_array'
+        );
     }
 
     /**
-     * @param array  $options
-     * @param string $name
-     * @param mixed  $default
+     * @param array    $options
+     * @param string   $name
+     * @param mixed    $default
+     * @param callable $type
      *
      * @return mixed
      */
-    private function getOption(array $options, $name, $default = null)
+    private function getOption(array $options, $name, $default = null, callable $type = null)
     {
         if (array_key_exists($name, $options)) {
-            return $options[$name];
+            $result = $options[$name];
         } else {
-            return $default;
+            $result = $default;
         }
+        if ($type) {
+            if (!call_user_func($type, $result)) {
+                throw new InvalidArgumentException(
+                    "The value: " . print_r($result, true) . " for option: {$name} is invalid"
+                );
+            }
+        }
+
+        return $result;
     }
 
     /**
