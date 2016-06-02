@@ -17,20 +17,26 @@ class CsvConfiguration implements CsvConfigurationInterface
 {
     const DEFAULT_DELIMITER    = ',';
     const DEFAULT_NULL         = '\\N';
-    const DEFAULT_NEW_LINE     = PHP_EOL;
+    const DEFAULT_NEW_LINES    = ["\n", "\r", "\r\n"];
     const DEFAULT_QUOTE        = '"';
     const DEFAULT_ESCAPE       = '\\';
     const DEFAULT_DOUBLE_QUOTE = false;
-    const DEFAULT_BOM          = null;
+    const DEFAULT_BOMS         = [
+        Bom::BOM_UTF8,
+        Bom::BOM_UTF16_BE,
+        Bom::BOM_UTF16_LE,
+        Bom::BOM_UTF32_BE,
+        Bom::BOM_UTF32_LE,
+    ];
     const DEFAULT_ENCODING     = 'UTF-8';
 
     const OPTION_DELIMITER    = 'delimiter';
     const OPTION_NULL         = 'null';
-    const OPTION_NEW_LINE     = 'newLine';
+    const OPTION_NEW_LINES    = 'newLines';
     const OPTION_QUOTE        = 'quote';
     const OPTION_ESCAPE       = 'escape';
     const OPTION_DOUBLE_QUOTE = 'doubleQuote';
-    const OPTION_BOM          = 'bom';
+    const OPTION_BOMS         = 'boms';
     const OPTION_ENCODING     = 'encoding';
 
     /** @var string */
@@ -41,12 +47,12 @@ class CsvConfiguration implements CsvConfigurationInterface
     private $escape;
     /** @var bool */
     private $doubleQuotes;
-    /** @var string|array */
-    private $newLine;
+    /** @var string[] */
+    private $newLines;
     /** @var string */
     private $null;
-    /** @var string|null */
-    private $bom;
+    /** @var string[] */
+    private $boms;
     /** @var string */
     private $encoding;
 
@@ -58,9 +64,10 @@ class CsvConfiguration implements CsvConfigurationInterface
      *                       <p> `quote`        string (Default: `'"'`)
      *                       <p> `escape`       string (Default: `'\\'`)
      *                       <p> `doubleQuotes` string (Default: `false`)
-     *                       <p> `newLine`      string|array (Default: `PHP_EOL`)
+     *                       <p> `newLines`     string[] (Default: `["\n","\r","\r\n"]`)
      *                       <p> `null`         string (Default: `'\\N'`)
-     *                       <p> `bom`          string (Default: `null`)
+     *                       <p> `boms`         string[] (Default:
+     *                       `[Bom::BOM_UTF8,Bom::BOM_UTF16_BE,Bom::BOM_UTF16_LE,Bom::BOM_UTF32_BE,Bom::BOM_UTF32_LE]`)
      *                       <p> `encoding`     string (Default: `'UTF-8'`)
      */
     public function __construct(array $options = [])
@@ -69,9 +76,9 @@ class CsvConfiguration implements CsvConfigurationInterface
         $this->quote = $this->getOption($options, static::OPTION_QUOTE, static::DEFAULT_QUOTE);
         $this->escape = $this->getOption($options, static::OPTION_ESCAPE, static::DEFAULT_ESCAPE);
         $this->doubleQuotes = $this->getOption($options, static::OPTION_DOUBLE_QUOTE, static::DEFAULT_DOUBLE_QUOTE);
-        $this->newLine = $this->getOption($options, static::OPTION_NEW_LINE, static::DEFAULT_NEW_LINE);
+        $this->newLines = $this->getOption($options, static::OPTION_NEW_LINES, static::DEFAULT_NEW_LINES);
         $this->null = $this->getOption($options, static::OPTION_NULL, static::DEFAULT_NULL);
-        $this->bom = $this->getOption($options, static::OPTION_BOM, static::DEFAULT_BOM);
+        $this->boms = $this->getOption($options, static::OPTION_BOMS, static::DEFAULT_BOMS);
         $this->encoding = $this->getOption($options, static::OPTION_ENCODING, static::DEFAULT_ENCODING);
     }
 
@@ -116,11 +123,11 @@ class CsvConfiguration implements CsvConfigurationInterface
     }
 
     /**
-     * @return string|array
+     * @return string[]
      */
-    public function getNewLine()
+    public function getNewLines()
     {
-        return $this->newLine;
+        return $this->newLines;
     }
 
     /**
@@ -140,11 +147,11 @@ class CsvConfiguration implements CsvConfigurationInterface
     }
 
     /**
-     * @return string|null
+     * @return string[]
      */
-    public function getBom()
+    public function getBoms()
     {
-        return $this->bom;
+        return $this->boms;
     }
 
     /**

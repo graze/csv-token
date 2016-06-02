@@ -31,9 +31,9 @@ interface CsvConfigurationInterface
     public function getEscape();
 
     /**
-     * @return string|array
+     * @return string[]
      */
-    public function getNewLine();
+    public function getNewLines();
 
     /**
      * @return bool
@@ -46,9 +46,9 @@ interface CsvConfigurationInterface
     public function getNullValue();
 
     /**
-     * @return string|null
+     * @return string[]
      */
-    public function getBom();
+    public function getBoms();
 
     /**
      * @return string

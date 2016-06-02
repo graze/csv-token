@@ -2,7 +2,6 @@
 
 namespace Graze\CsvToken\Tokeniser\Token;
 
-use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
 
 class TokenStore implements TokenStoreInterface
@@ -63,23 +62,14 @@ class TokenStore implements TokenStoreInterface
             $tokens[$config->getEscape()] = Token::T_ESCAPE;
         }
 
-        $newLines = $config->getNewLine();
-        if (!is_array($newLines)) {
-            $newLines = [$newLines];
-        }
-        foreach ($newLines as $newLine) {
+        foreach ($config->getNewLines() as $newLine) {
             $tokens[$newLine] = Token::T_NEW_LINE;
         }
         if (!is_null($config->getNullValue())) {
             $tokens[$config->getNullValue()] = Token::T_NULL;
         }
 
-        if (is_null($config->getBom())) {
-            $boms = [Bom::BOM_UTF8, Bom::BOM_UTF16_BE, Bom::BOM_UTF16_LE, Bom::BOM_UTF32_BE, Bom::BOM_UTF32_LE];
-        } else {
-            $boms = [$config->getBom()];
-        }
-        foreach ($boms as $bom) {
+        foreach ($config->getBoms() as $bom) {
             $tokens[$bom] = Token::T_BOM;
         }
 

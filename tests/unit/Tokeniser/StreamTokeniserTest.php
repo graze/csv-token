@@ -163,7 +163,7 @@ class StreamTokeniserTest extends TestCase
                     CsvConfiguration::OPTION_QUOTE        => "'",
                     CsvConfiguration::OPTION_ESCAPE       => '\\',
                     CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
-                    CsvConfiguration::OPTION_NEW_LINE     => '---',
+                    CsvConfiguration::OPTION_NEW_LINES    => ['---'],
                     CsvConfiguration::OPTION_NULL         => '\\N',
                 ]),
                 "'some'|text|'\\'here'|\\N|'with''quotes'---'another'|'line'",
@@ -327,7 +327,7 @@ class StreamTokeniserTest extends TestCase
             ],
             [
                 new CsvConfiguration([
-                    CsvConfiguration::OPTION_ENCODING => 'UTF-16'
+                    CsvConfiguration::OPTION_ENCODING => 'UTF-16',
                 ]),
                 mb_convert_encoding('"sõme","tēxt","hêre"', 'UTF-16'),
                 [
@@ -342,11 +342,11 @@ class StreamTokeniserTest extends TestCase
                     [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
                     [Token::T_CONTENT, mb_convert_encoding('hêre', 'UTF-16')],
                     [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16')],
-                ]
+                ],
             ],
             [
                 new CsvConfiguration([
-                    CsvConfiguration::OPTION_BOM => Bom::BOM_UTF16_BE
+                    CsvConfiguration::OPTION_BOMS => [Bom::BOM_UTF16_BE],
                 ]),
                 Bom::BOM_UTF16_BE . mb_convert_encoding('"sõme","tēxt","hêre"', 'UTF-16BE'),
                 [
@@ -362,8 +362,8 @@ class StreamTokeniserTest extends TestCase
                     [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
                     [Token::T_CONTENT, mb_convert_encoding('hêre', 'UTF-16BE')],
                     [Token::T_QUOTE, mb_convert_encoding('"', 'UTF-16BE')],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

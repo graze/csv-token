@@ -72,7 +72,7 @@ class ParserTest extends TestCase
                     CsvConfiguration::OPTION_QUOTE        => "'",
                     CsvConfiguration::OPTION_ESCAPE       => '\\',
                     CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
-                    CsvConfiguration::OPTION_NEW_LINE     => '---',
+                    CsvConfiguration::OPTION_NEW_LINES    => ['---'],
                     CsvConfiguration::OPTION_NULL         => '\\N',
                 ]),
                 "'some'|text|'\\'here'|\\N|'with''quotes'---'another'|'line'",
