@@ -93,10 +93,10 @@ class CsvConfiguration implements CsvConfigurationInterface
     }
 
     /**
-     * @param array    $options
-     * @param string   $name
-     * @param mixed    $default
-     * @param callable $type
+     * @param array         $options
+     * @param string        $name
+     * @param mixed         $default
+     * @param callable|null $type
      *
      * @return mixed
      */
@@ -107,12 +107,10 @@ class CsvConfiguration implements CsvConfigurationInterface
         } else {
             $result = $default;
         }
-        if ($type) {
-            if (!call_user_func($type, $result)) {
-                throw new InvalidArgumentException(
-                    "The value: " . print_r($result, true) . " for option: {$name} is invalid"
-                );
-            }
+        if ($type && !call_user_func($type, $result)) {
+            throw new InvalidArgumentException(
+                "The provided option for {$name}: " . print_r($result, true) . " is invalid"
+            );
         }
 
         return $result;
