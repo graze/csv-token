@@ -92,7 +92,7 @@ class TokenStore implements TokenStoreInterface
     public function setEncoding($encoding)
     {
         if ($encoding != $this->lastEncoding) {
-            if ($this->lastEncoding) {
+            if (!is_null($this->lastEncoding)) {
                 $changeEncoding = function ($string) use ($encoding) {
                     return mb_convert_encoding($string, $encoding, $this->lastEncoding);
                 };
