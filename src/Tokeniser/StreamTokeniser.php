@@ -18,14 +18,15 @@ use Graze\CsvToken\Csv\CsvConfigurationInterface;
 use Graze\CsvToken\Tokeniser\Token\Token;
 use Graze\CsvToken\Tokeniser\Token\TokenStore;
 use Iterator;
-use Psr\Http\Message\StreamInterface;
 
 class StreamTokeniser implements TokeniserInterface
 {
     use StateBuilder;
 
+    const BUFFER_SIZE = 128;
+
     /** @var int */
-    private $maxTypeLength;
+    private $minLength;
     /** @var resource */
     private $stream;
     /** @var State */
@@ -37,14 +38,14 @@ class StreamTokeniser implements TokeniserInterface
      * Tokeniser constructor.
      *
      * @param CsvConfigurationInterface $config
-     * @param resource $stream
+     * @param resource                  $stream
      */
     public function __construct(CsvConfigurationInterface $config, $stream)
     {
         $this->tokenStore = new TokenStore($config);
         $this->state = $this->buildStates($this->tokenStore);
         $types = $this->tokenStore->getTokens();
-        $this->maxTypeLength = count($types) > 0 ? strlen(array_keys($types)[0]) : 1;
+        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) : 1;
         $this->stream = $stream;
     }
 
@@ -58,7 +59,7 @@ class StreamTokeniser implements TokeniserInterface
     {
         fseek($this->stream, 0);
         $position = ftell($this->stream);
-        $buffer = fread($this->stream, $this->maxTypeLength);
+        $buffer = fread($this->stream, static::BUFFER_SIZE);
 
         /** @var Token $last */
         $last = null;
@@ -86,7 +87,10 @@ class StreamTokeniser implements TokeniserInterface
             }
 
             $position += $len;
-            $buffer = substr($buffer, $len) . fread($this->stream, $len);
+            $buffer = substr($buffer, $len);
+            if (strlen($buffer) <= $this->minLength) {
+                $buffer .= fread($this->stream, static::BUFFER_SIZE);
+            }
         }
 
         if (!is_null($last)) {

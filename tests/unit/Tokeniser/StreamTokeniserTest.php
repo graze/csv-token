@@ -63,7 +63,7 @@ class StreamTokeniserTest extends TestCase
         $stream = fopen('php://memory', 'r+');
         fwrite($stream, $string);
         rewind($stream);
-        return new $stream;
+        return $stream;
     }
 
     /**
