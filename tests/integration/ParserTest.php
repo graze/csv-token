@@ -147,6 +147,18 @@ class ParserTest extends TestCase
                     ['text', 'here', 'and\,here'],
                 ],
             ],
+            [
+                new CsvConfiguration([
+                    CsvConfiguration::OPTION_DELIMITER    => '|',
+                    CsvConfiguration::OPTION_ESCAPE       => '~',
+                    CsvConfiguration::OPTION_QUOTE        => '`',
+                    CsvConfiguration::OPTION_NULL         => 'null',
+                    CsvConfiguration::OPTION_DOUBLE_QUOTE => true,
+                ]),
+                '`string`|`other,thing`|some stuff|escaped ~\\n|``` all the `` quotes `|null',
+                [],
+                [['string', 'other,thing', 'some stuff', 'escaped \n', '` all the ` quotes ', null]],
+            ],
         ];
     }
 

@@ -29,6 +29,6 @@ class StringTokeniser extends StreamTokeniser
         $stream = fopen('php://memory', 'r+');
         fwrite($stream, $csv);
         rewind($stream);
-        parent::__construct($config, new Stream($stream));
+        parent::__construct($config, $stream);
     }
 }

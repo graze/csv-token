@@ -26,7 +26,7 @@ class StreamTokeniser implements TokeniserInterface
 
     /** @var int */
     private $maxTypeLength;
-    /** @var StreamInterface */
+    /** @var resource */
     private $stream;
     /** @var State */
     private $state;
@@ -37,9 +37,9 @@ class StreamTokeniser implements TokeniserInterface
      * Tokeniser constructor.
      *
      * @param CsvConfigurationInterface $config
-     * @param StreamInterface           $stream
+     * @param resource $stream
      */
-    public function __construct(CsvConfigurationInterface $config, StreamInterface $stream)
+    public function __construct(CsvConfigurationInterface $config, $stream)
     {
         $this->tokenStore = new TokenStore($config);
         $this->state = $this->buildStates($this->tokenStore);
@@ -56,9 +56,9 @@ class StreamTokeniser implements TokeniserInterface
      */
     public function getTokens()
     {
-        $this->stream->rewind();
-        $position = $this->stream->tell();
-        $buffer = $this->stream->read($this->maxTypeLength);
+        fseek($this->stream, 0);
+        $position = ftell($this->stream);
+        $buffer = fread($this->stream, $this->maxTypeLength);
 
         /** @var Token $last */
         $last = null;
@@ -86,14 +86,14 @@ class StreamTokeniser implements TokeniserInterface
             }
 
             $position += $len;
-            $buffer = substr($buffer, $len) . $this->stream->read($len);
+            $buffer = substr($buffer, $len) . fread($this->stream, $len);
         }
 
         if (!is_null($last)) {
             yield $last;
         }
 
-        $this->stream->close();
+        fclose($this->stream);
     }
 
     /**
