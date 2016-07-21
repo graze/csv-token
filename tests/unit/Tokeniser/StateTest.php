@@ -25,10 +25,9 @@ class StateTest extends TestCase
     public function testCallGetNextStateWithAnInvalidTokenWillThrowAnException()
     {
         $tokenStore = m::mock(TokenStoreInterface::class);
-        $state = new State($tokenStore);
-
         $tokenStore->shouldReceive('getTokens')
                    ->andReturn([]);
+        $state = new State($tokenStore);
 
         $state->addStateTarget(Token::T_CONTENT, $state);
 

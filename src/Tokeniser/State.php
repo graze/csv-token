@@ -34,22 +34,34 @@ class State
     /** @var State[] */
     private $states;
     /** @var TokenStoreInterface */
-    private $tokens;
-    /**
-     * @var int
-     */
+    private $tokenStore;
+    /** @var int */
     private $tokenMask;
+    /** @var int[] */
+    private $tokens;
+    /** @var string[] */
+    private $keys;
+    /** @var int */
+    private $maxLen;
 
     /**
-     * State constructor.
+     * TokenStoreInterface is passed in here, as the tokens can be modified by the store
      *
      * @param TokenStoreInterface $tokens
      * @param int                 $tokenMask
      */
     public function __construct(TokenStoreInterface $tokens, $tokenMask = Token::T_ANY)
     {
-        $this->tokens = $tokens;
+        $this->tokenStore = $tokens;
         $this->tokenMask = $tokenMask;
+        $this->parseTokens();
+    }
+
+    private function parseTokens()
+    {
+        $this->tokens = $this->tokenStore->getTokens($this->tokenMask);
+        $this->keys = array_keys($this->tokens);
+        $this->maxLen = (count($this->keys) > 0) ? strlen($this->keys[0]) : 0;
     }
 
     /**
@@ -83,13 +95,51 @@ class State
      *
      * @return Token
      */
-    public function match($position, $buffer)
+    public function match($position, &$buffer)
     {
-        foreach ($this->tokens->getTokens($this->tokenMask) as $search => $tokenType) {
-            if (substr($buffer, 0, strlen($search)) == $search) {
-                return new Token($tokenType, $search, $position);
+//        var_dump($buffer);
+
+//            $maxLen = strlen($keys[0]);
+//            var_dump($maxLen);
+//            $bufferLen = strlen($buffer);
+//
+//            for ($i = 0; $i <= ($bufferLen - $maxLen); $i++) {
+//                var_dump($i);
+//                $buf = substr($buffer, $i, $maxLen);
+//                while ($buf != '') {
+//                    var_dump($buf);
+//                    if (isset($tokens[$buf])) {
+//                        if ($i > 0) {
+//                            var_dump(substr($buffer, 0, $i));
+//                            return new Token(Token::T_CONTENT, substr($buffer, 0, $i), $position);
+//                        } else {
+//                            return new Token($tokens[$buf], $buf, $position);
+//                        }
+//                    }
+//                    $buf = substr($buf, 0, -1);
+//                }
+//            }
+//        }
+
+        if ($this->tokenStore->hasChanged($this->tokenMask)) {
+            $this->parseTokens();
+        }
+
+        if ($this->maxLen > 0) {
+            $buf = substr($buffer, 0, $this->maxLen);
+            while ($buf != '') {
+                if (isset($this->tokens[$buf])) {
+                    return new Token($this->tokens[$buf], $buf, $position);
+                }
+                $buf = substr($buf, 0, -1);
             }
         }
+
+//        foreach ($this->tokens->getTokens($this->tokenMask) as $search => $tokenType) {
+//            if (substr($buffer, 0, strlen($search)) == $search) {
+//                return new Token($tokenType, $search, $position);
+//            }
+//        }
 
         return new Token(Token::T_CONTENT, $buffer[0], $position);
     }

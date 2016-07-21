@@ -45,7 +45,7 @@ class StreamTokeniser implements TokeniserInterface
         $this->tokenStore = new TokenStore($config);
         $this->state = $this->buildStates($this->tokenStore);
         $types = $this->tokenStore->getTokens();
-        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) : 1;
+        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) * 2 : 1;
         $this->stream = $stream;
     }
 

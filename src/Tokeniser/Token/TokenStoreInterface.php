@@ -12,4 +12,13 @@ interface TokenStoreInterface
      * @return int[]
      */
     public function getTokens($mask = Token::T_ANY);
+
+    /**
+     * Determine if a mask set of tokens has changed
+     *
+     * @param int $mask
+     *
+     * @return bool
+     */
+    public function hasChanged($mask = Token::T_ANY);
 }

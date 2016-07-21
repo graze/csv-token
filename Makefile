@@ -50,6 +50,9 @@ test-matrix: ## Run the unit tests against multiple targets.
 test-integration: ## Run the integration testsuite.
 	$(DOCKER_RUN) vendor/bin/phpunit --colors=always --testsuite integration
 
+test-performance: ## Run the performance testsuite.
+	$(DOCKER_RUN) vendor/bin/phpunit --colors=always --testsuite performance
+
 test-coverage: ## Run all tests and output coverage to the console.
 	$(DOCKER_RUN) vendor/bin/phpunit --coverage-text
 
