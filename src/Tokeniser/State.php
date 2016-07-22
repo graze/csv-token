@@ -97,30 +97,6 @@ class State
      */
     public function match($position, &$buffer)
     {
-//        var_dump($buffer);
-
-//            $maxLen = strlen($keys[0]);
-//            var_dump($maxLen);
-//            $bufferLen = strlen($buffer);
-//
-//            for ($i = 0; $i <= ($bufferLen - $maxLen); $i++) {
-//                var_dump($i);
-//                $buf = substr($buffer, $i, $maxLen);
-//                while ($buf != '') {
-//                    var_dump($buf);
-//                    if (isset($tokens[$buf])) {
-//                        if ($i > 0) {
-//                            var_dump(substr($buffer, 0, $i));
-//                            return new Token(Token::T_CONTENT, substr($buffer, 0, $i), $position);
-//                        } else {
-//                            return new Token($tokens[$buf], $buf, $position);
-//                        }
-//                    }
-//                    $buf = substr($buf, 0, -1);
-//                }
-//            }
-//        }
-
         if ($this->tokenStore->hasChanged($this->tokenMask)) {
             $this->parseTokens();
         }
@@ -134,12 +110,6 @@ class State
                 $buf = substr($buf, 0, -1);
             }
         }
-
-//        foreach ($this->tokens->getTokens($this->tokenMask) as $search => $tokenType) {
-//            if (substr($buffer, 0, strlen($search)) == $search) {
-//                return new Token($tokenType, $search, $position);
-//            }
-//        }
 
         return new Token(Token::T_CONTENT, $buffer[0], $position);
     }
