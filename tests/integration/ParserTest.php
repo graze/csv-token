@@ -39,8 +39,6 @@ class ParserTest extends TestCase
 
         $results = iterator_to_array($parser->parse($tokeniser->getTokens()));
 
-        $results = array_map('iterator_to_array', $results);
-
         static::assertEquals($expected, $results);
     }
 

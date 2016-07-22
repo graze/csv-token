@@ -67,17 +67,21 @@ class StreamTokeniser implements TokeniserInterface
         while (strlen($buffer) > 0) {
             $token = $this->state->match($position, $buffer);
 
-            if ($token->getType() == Token::T_BOM) {
-                $this->changeEncoding($token);
+            if ($token[0] == Token::T_BOM) {
+                $this->changeEncoding($token[1]);
             }
 
-            $this->state = $this->state->getNextState($token->getType());
+            $this->state = $this->state->getNextState($token[0]);
 
-            $len = $token->getLength();
+            $len = strlen($token[1]);
 
             // merge tokens together to condense T_CONTENT tokens
-            if ($token->getType() == Token::T_CONTENT) {
-                $last = (!is_null($last)) ? $last->addContent($token->getContent()) : $token;
+            if ($token[0] == Token::T_CONTENT) {
+                if (!is_null($last)) {
+                    $last[1] .= $token[1];
+                } else {
+                    $last = $token;
+                }
             } else {
                 if (!is_null($last)) {
                     yield $last;
@@ -101,10 +105,10 @@ class StreamTokeniser implements TokeniserInterface
     }
 
     /**
-     * @param Token $token
+     * @param string $content
      */
-    private function changeEncoding(Token $token)
+    private function changeEncoding($content)
     {
-        $this->tokenStore->setEncoding(Bom::getEncoding($token->getContent()));
+        $this->tokenStore->setEncoding(Bom::getEncoding($content));
     }
 }

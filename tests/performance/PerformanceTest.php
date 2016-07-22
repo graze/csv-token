@@ -16,7 +16,7 @@ class PerformanceTest extends TestCase
      */
     public function testPerformance($path)
     {
-        $iterations = array_pad([], 5, -1);
+        $iterations = array_pad([], 20, -1);
 
         foreach ($iterations as &$iteration) {
             $start = microtime(true);

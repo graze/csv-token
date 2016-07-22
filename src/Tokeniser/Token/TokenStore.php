@@ -126,6 +126,6 @@ class TokenStore implements TokenStoreInterface
      */
     public function hasChanged($mask = Token::T_ANY)
     {
-        return !array_key_exists($mask, $this->maskStore);
+        return !isset($this->maskStore[$mask]);
     }
 }

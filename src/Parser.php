@@ -43,56 +43,50 @@ class Parser implements ParserInterface
     public function parse(Iterator $tokens)
     {
         $value = new Value($this->valueParsers);
-        $row = new ArrayIterator();
+        $row = [];
 
-        $tokens->rewind();
-        /** @var Token $token */
-        $token = $tokens->current();
-        while (!is_null($token)) {
-            switch ($token->getType()) {
+        foreach ($tokens as $token) {
+            switch ($token[0]) {
                 case Token::T_QUOTE:
                     $value->setInQuotes(!$value->isInQuotes());
                     break;
                 case Token::T_CONTENT:
-                    $value->addContent($token->getContent());
+                    $value->addContent($token[1]);
                     break;
                 case Token::T_DOUBLE_QUOTE:
-                    $value->addContent(substr($token->getContent(), 0, $token->getLength() / 2));
+                    $value->addContent(substr($token[1], 0, strlen($token[1]) / 2));
                     break;
                 case Token::T_NULL:
                     if ($value->isEmpty() && !$value->isInQuotes() && !$value->wasQuoted()) {
-                        $value->addContent($token->getContent());
+                        $value->addContent($token[1]);
                         $value->setIsNull();
                     } else {
-                        $value->addContent($token->getContent());
+                        $value->addContent($token[1]);
                     }
                     break;
                 case Token::T_DELIMITER:
-                    $row->append($value->getValue());
+                    $row[] = $value->getValue();
                     $value->reset();
                     break;
                 case Token::T_NEW_LINE:
-                    $row->append($value->getValue());
+                    $row[] = $value->getValue();
                     $value->reset();
                     yield $row;
-                    $row = new ArrayIterator();
+                    $row = [];
                     break;
                 default:
                     break;
             }
-
-            $tokens->next();
-            $token = $tokens->current();
         }
 
         if (!$value->isEmpty()) {
             if ($value->isInQuotes()) {
                 throw new RuntimeException("Unmatched quote at the end of the csv data");
             }
-            $row->append($value->getValue());
+            $row[] = $value->getValue();
         }
 
-        if ($row->count() > 0) {
+        if (count($row) > 0) {
             yield $row;
         }
     }

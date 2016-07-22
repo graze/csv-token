@@ -37,8 +37,8 @@ class StreamTokeniserTest extends TestCase
         /** @var Token[] $actual */
         $actual = iterator_to_array($tokeniser->getTokens());
 
-        $tokensOnly = array_map(function (Token $token) {
-            return [$token->getType(), $token->getContent()];
+        $tokensOnly = array_map(function ($token) {
+            return [$token[0], $token[1]];
         }, $actual);
 
         static::assertEquals($tokens, $tokensOnly);
@@ -46,8 +46,8 @@ class StreamTokeniserTest extends TestCase
         $count = count($actual);
         for ($i = 1; $i < $count; $i++) {
             static::assertEquals(
-                $actual[$i]->getPosition(),
-                $actual[$i - 1]->getPosition() + $actual[$i - 1]->getLength(),
+                $actual[$i][2],
+                $actual[$i - 1][2] + strlen($actual[$i - 1][1]),
                 "There should be no missing gaps in the data"
             );
         }
