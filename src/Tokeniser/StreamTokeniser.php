@@ -59,12 +59,13 @@ class StreamTokeniser implements TokeniserInterface
     {
         fseek($this->stream, 0);
         $position = ftell($this->stream);
-        $buffer = fread($this->stream, static::BUFFER_SIZE);
+        $buffer = $next = fread($this->stream, static::BUFFER_SIZE);
+        $bufferLen = strlen($buffer);
 
         /** @var Token $last */
         $last = null;
 
-        while (strlen($buffer) > 0) {
+        while ($bufferLen > 0) {
             $token = $this->state->match($position, $buffer);
 
             if ($token[0] == Token::T_BOM) {
@@ -91,8 +92,11 @@ class StreamTokeniser implements TokeniserInterface
 
             $position += $token[3];
             $buffer = substr($buffer, $token[3]);
-            if (strlen($buffer) <= $this->minLength) {
-                $buffer .= fread($this->stream, static::BUFFER_SIZE);
+            $bufferLen -= $token[3];
+            if ($next && $bufferLen <= $this->minLength) {
+                $next = fread($this->stream, static::BUFFER_SIZE);
+                $buffer .= $next;
+                $bufferLen = strlen($buffer);
             }
         }
 
@@ -109,5 +113,7 @@ class StreamTokeniser implements TokeniserInterface
     private function changeEncoding($content)
     {
         $this->tokenStore->setEncoding(Bom::getEncoding($content));
+        $types = $this->tokenStore->getTokens();
+        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) * 2 : 1;
     }
 }

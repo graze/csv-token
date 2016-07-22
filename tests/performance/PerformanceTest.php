@@ -13,12 +13,13 @@ class PerformanceTest extends TestCase
      * @dataProvider getFixtures
      *
      * @param string $path
+     * @param int    $iterations
      */
-    public function testPerformance($path)
+    public function testPerformance($path, $iterations)
     {
-        $iterations = array_pad([], 20, -1);
+        $runs = array_pad([], $iterations, -1);
 
-        foreach ($iterations as &$iteration) {
+        foreach ($runs as &$iteration) {
             $start = microtime(true);
             $parser = new Parser();
             $tokeniser = new StreamTokeniser(new CsvConfiguration(), fopen($path, 'r'));
@@ -28,9 +29,9 @@ class PerformanceTest extends TestCase
             $iteration = microtime(true) - $start;
         }
 
-        $average = array_sum($iterations) / count($iterations);
+        $average = array_sum($runs) / count($runs);
 
-        echo sprintf("Path: %s - iterations: %d - average: %.2f ms", $path, count($iterations), $average * 1000);
+        printf("\nPath: %s - iterations: %d - average: %.2f ms\n", $path, count($runs), $average * 1000);
     }
 
     /**
@@ -39,7 +40,8 @@ class PerformanceTest extends TestCase
     public function getFixtures()
     {
         return [
-            [__DIR__ . '/fixture.csv'],
+            [__DIR__ . '/fixture.csv', 20],
+            [__DIR__ . '/big.csv', 5],
         ];
     }
 }

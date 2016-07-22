@@ -97,9 +97,9 @@ class State
      * @param int    $position
      * @param string $buffer
      *
-     * @return Token
+     * @return array
      */
-    public function match($position, &$buffer)
+    public function match($position, $buffer)
     {
         if ($this->tokenStore->hasChanged($this->tokenMask)) {
             $this->parseTokens();
