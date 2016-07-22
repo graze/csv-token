@@ -54,7 +54,7 @@ class Parser implements ParserInterface
                     $value->addContent($token[1]);
                     break;
                 case Token::T_DOUBLE_QUOTE:
-                    $value->addContent(substr($token[1], 0, strlen($token[1]) / 2));
+                    $value->addContent(substr($token[1], 0, $token[3] / 2));
                     break;
                 case Token::T_NULL:
                     if ($value->isEmpty() && !$value->isInQuotes() && !$value->wasQuoted()) {

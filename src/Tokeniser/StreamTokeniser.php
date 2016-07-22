@@ -73,12 +73,11 @@ class StreamTokeniser implements TokeniserInterface
 
             $this->state = $this->state->getNextState($token[0]);
 
-            $len = strlen($token[1]);
-
             // merge tokens together to condense T_CONTENT tokens
             if ($token[0] == Token::T_CONTENT) {
                 if (!is_null($last)) {
                     $last[1] .= $token[1];
+                    $last[3] = strlen($last[1]);
                 } else {
                     $last = $token;
                 }
@@ -90,8 +89,8 @@ class StreamTokeniser implements TokeniserInterface
                 yield $token;
             }
 
-            $position += $len;
-            $buffer = substr($buffer, $len);
+            $position += $token[3];
+            $buffer = substr($buffer, $token[3]);
             if (strlen($buffer) <= $this->minLength) {
                 $buffer .= fread($this->stream, static::BUFFER_SIZE);
             }

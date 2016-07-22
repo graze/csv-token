@@ -43,6 +43,8 @@ class State
     private $keys;
     /** @var int[] */
     private $keyLengths;
+    /** @var int */
+    private $maxLen;
 
     /**
      * TokenStoreInterface is passed in here, as the tokens can be modified by the store
@@ -63,6 +65,7 @@ class State
         $this->keys = array_keys($this->tokens);
         $this->keyLengths = array_unique(array_map('strlen', $this->keys));
         arsort($this->keyLengths);
+        $this->maxLen = reset($this->keyLengths);
     }
 
     /**
@@ -102,13 +105,20 @@ class State
             $this->parseTokens();
         }
 
-        foreach ($this->keyLengths as $len) {
-            $buf = substr($buffer, 0, $len);
-            if (isset($this->tokens[$buf])) {
-                return [$this->tokens[$buf], $buf, $position];
+        $totalLen = max(strlen($buffer) - $this->maxLen, 1);
+        for ($i = 0; $i < $totalLen; $i++) {
+            foreach ($this->keyLengths as $len) {
+                $buf = substr($buffer, $i, $len);
+                if (isset($this->tokens[$buf])) {
+                    if ($i > 0) {
+                        return [Token::T_CONTENT, substr($buffer, 0, $i), $position, $i];
+                    } else {
+                        return [$this->tokens[$buf], $buf, $position, $len];
+                    }
+                }
             }
         }
 
-        return [Token::T_CONTENT, $buffer[0], $position];
+        return [Token::T_CONTENT, $buffer[0], $position, 1];
     }
 }
