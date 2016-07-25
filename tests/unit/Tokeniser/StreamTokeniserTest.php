@@ -47,7 +47,7 @@ class StreamTokeniserTest extends TestCase
         for ($i = 1; $i < $count; $i++) {
             static::assertEquals(
                 $actual[$i][2],
-                $actual[$i - 1][2] + strlen($actual[$i - 1][1]),
+                $actual[$i - 1][2] + $actual[$i - 1][3],
                 "There should be no missing gaps in the data"
             );
         }

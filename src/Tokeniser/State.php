@@ -13,6 +13,7 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Buffer\BufferInterface;
 use Graze\CsvToken\Tokeniser\Token\Token;
 use Graze\CsvToken\Tokeniser\Token\TokenStoreInterface;
 use RuntimeException;
@@ -59,6 +60,9 @@ class State
         $this->parseTokens();
     }
 
+    /**
+     * Parse the current set ok tokens and cache some metadata about them for speed
+     */
     private function parseTokens()
     {
         $this->tokens = $this->tokenStore->getTokens($this->tokenMask);
@@ -94,31 +98,43 @@ class State
     }
 
     /**
-     * @param int    $position
-     * @param string $buffer
+     * @param BufferInterface $buffer
      *
      * @return array
      */
-    public function match($position, $buffer)
+    public function match(BufferInterface $buffer)
     {
         if ($this->tokenStore->hasChanged($this->tokenMask)) {
             $this->parseTokens();
         }
 
-        $totalLen = max(strlen($buffer) - $this->maxLen, 1);
-        for ($i = 0; $i < $totalLen; $i++) {
-            foreach ($this->keyLengths as $len) {
-                $buf = substr($buffer, $i, $len);
-                if (isset($this->tokens[$buf])) {
-                    if ($i > 0) {
-                        return [Token::T_CONTENT, substr($buffer, 0, $i), $position, $i];
-                    } else {
-                        return [$this->tokens[$buf], $buf, $position, $len];
+        $contents = $buffer->getContents();
+        $length = $buffer->getLength();
+        $position = $buffer->getPosition();
+        if (count($this->tokens) > 0) {
+            $totalLen = max($length - $this->maxLen, 1);
+            for ($i = 0; $i < $totalLen; $i++) {
+                foreach ($this->keyLengths as $len) {
+                    $buf = substr($contents, $i, $len);
+                    if (isset($this->tokens[$buf])) {
+                        if ($i > 0) {
+                            return [
+                                [Token::T_CONTENT, substr($contents, 0, $i), $position, $i],
+                                [$this->tokens[$buf], $buf, $position + $i, $len],
+                            ];
+                        } else {
+                            return [[$this->tokens[$buf], $buf, $position, $len]];
+                        }
                     }
+                }
+                if ($totalLen !== $length && $i == $totalLen - 1) {
+                    $buffer->read();
+                    $totalLen = $length = $buffer->getLength();
+                    $contents = $buffer->getContents();
                 }
             }
         }
 
-        return [Token::T_CONTENT, $buffer[0], $position, 1];
+        return [[Token::T_CONTENT, $contents[0], $buffer->getPosition(), 1]];
     }
 }

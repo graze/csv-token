@@ -13,6 +13,7 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Buffer\StreamBuffer;
 use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
 use Graze\CsvToken\Tokeniser\Token\Token;
@@ -33,6 +34,8 @@ class StreamTokeniser implements TokeniserInterface
     private $state;
     /** @var TokenStore */
     private $tokenStore;
+    /** @var StreamBuffer */
+    private $buffer;
 
     /**
      * Tokeniser constructor.
@@ -58,45 +61,38 @@ class StreamTokeniser implements TokeniserInterface
     public function getTokens()
     {
         fseek($this->stream, 0);
-        $position = ftell($this->stream);
-        $buffer = $next = fread($this->stream, static::BUFFER_SIZE);
-        $bufferLen = strlen($buffer);
+        $this->buffer = new StreamBuffer($this->stream, static::BUFFER_SIZE, $this->minLength);
+        $this->buffer->read();
 
         /** @var Token $last */
         $last = null;
 
-        while ($bufferLen > 0) {
-            $token = $this->state->match($position, $buffer);
+        while (!$this->buffer->isEof()) {
+            foreach ($this->state->match($this->buffer) as $token) {
+                if ($token[0] == Token::T_BOM) {
+                    $this->changeEncoding($token[1]);
+                }
 
-            if ($token[0] == Token::T_BOM) {
-                $this->changeEncoding($token[1]);
-            }
+                $this->state = $this->state->getNextState($token[0]);
 
-            $this->state = $this->state->getNextState($token[0]);
-
-            // merge tokens together to condense T_CONTENT tokens
-            if ($token[0] == Token::T_CONTENT) {
-                if (!is_null($last)) {
-                    $last[1] .= $token[1];
-                    $last[3] = strlen($last[1]);
+                // merge tokens together to condense T_CONTENT tokens
+                if ($token[0] == Token::T_CONTENT) {
+                    if (!is_null($last)) {
+                        $last[1] .= $token[1];
+                        $last[3] = strlen($last[1]);
+                    } else {
+                        $last = $token;
+                    }
                 } else {
-                    $last = $token;
+                    if (!is_null($last)) {
+                        yield $last;
+                        $last = null;
+                    }
+                    yield $token;
                 }
-            } else {
-                if (!is_null($last)) {
-                    yield $last;
-                    $last = null;
-                }
-                yield $token;
-            }
 
-            $position += $token[3];
-            $buffer = substr($buffer, $token[3]);
-            $bufferLen -= $token[3];
-            if ($next && $bufferLen <= $this->minLength) {
-                $next = fread($this->stream, static::BUFFER_SIZE);
-                $buffer .= $next;
-                $bufferLen = strlen($buffer);
+                $this->buffer->move($token[3]);
+                $this->buffer->read();
             }
         }
 
@@ -115,5 +111,6 @@ class StreamTokeniser implements TokeniserInterface
         $this->tokenStore->setEncoding(Bom::getEncoding($content));
         $types = $this->tokenStore->getTokens();
         $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) * 2 : 1;
+        $this->buffer->setMinBufferSize($this->minLength);
     }
 }
