@@ -68,16 +68,14 @@ class StreamBuffer implements BufferInterface
      */
     public function read()
     {
-        if (!$this->eof) {
-            if ($this->minSize < 0 || $this->length <= $this->minSize) {
-                $next = fread($this->stream, $this->readLength);
-                if (strlen($next) > 0) {
-                    $this->contents .= $next;
-                    $this->length += strlen($next);
-                    return true;
-                } else {
-                    $this->eof = true;
-                }
+        if ($this->canRead()) {
+            $next = fread($this->stream, $this->readLength);
+            if (strlen($next) > 0) {
+                $this->contents .= $next;
+                $this->length += strlen($next);
+                return true;
+            } else {
+                $this->eof = true;
             }
         }
         return false;
@@ -97,6 +95,17 @@ class StreamBuffer implements BufferInterface
         $this->position += $this->length - $newLen;
         $this->length = $newLen;
         return true;
+    }
+
+    /**
+     * Determine if we can read more from the stream
+     *
+     * @return bool
+     */
+    private function canRead()
+    {
+        return ((!$this->eof)
+            && ($this->minSize < 0 || $this->length <= $this->minSize));
     }
 
     /**
