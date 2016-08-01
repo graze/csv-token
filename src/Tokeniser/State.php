@@ -13,6 +13,7 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Buffer\BufferInterface;
 use Graze\CsvToken\Tokeniser\Token\Token;
 use Graze\CsvToken\Tokeniser\Token\TokenStoreInterface;
 use RuntimeException;
@@ -34,22 +35,41 @@ class State
     /** @var State[] */
     private $states;
     /** @var TokenStoreInterface */
-    private $tokens;
-    /**
-     * @var int
-     */
+    private $tokenStore;
+    /** @var int */
     private $tokenMask;
+    /** @var int[] */
+    private $tokens;
+    /** @var string[] */
+    private $keys;
+    /** @var int[] */
+    private $keyLengths;
+    /** @var int */
+    private $maxLen;
 
     /**
-     * State constructor.
+     * TokenStoreInterface is passed in here, as the tokens can be modified by the store
      *
      * @param TokenStoreInterface $tokens
      * @param int                 $tokenMask
      */
     public function __construct(TokenStoreInterface $tokens, $tokenMask = Token::T_ANY)
     {
-        $this->tokens = $tokens;
+        $this->tokenStore = $tokens;
         $this->tokenMask = $tokenMask;
+        $this->parseTokens();
+    }
+
+    /**
+     * Parse the current set ok tokens and cache some metadata about them for speed
+     */
+    private function parseTokens()
+    {
+        $this->tokens = $this->tokenStore->getTokens($this->tokenMask);
+        $this->keys = array_keys($this->tokens);
+        $this->keyLengths = array_unique(array_map('strlen', $this->keys));
+        arsort($this->keyLengths);
+        $this->maxLen = reset($this->keyLengths);
     }
 
     /**
@@ -78,19 +98,43 @@ class State
     }
 
     /**
-     * @param int    $position
-     * @param string $buffer
+     * @param BufferInterface $buffer
      *
-     * @return Token
+     * @return array
      */
-    public function match($position, $buffer)
+    public function match(BufferInterface $buffer)
     {
-        foreach ($this->tokens->getTokens($this->tokenMask) as $search => $tokenType) {
-            if (substr($buffer, 0, strlen($search)) == $search) {
-                return new Token($tokenType, $search, $position);
+        if ($this->tokenStore->hasChanged($this->tokenMask)) {
+            $this->parseTokens();
+        }
+
+        $contents = $buffer->getContents();
+        $length = $buffer->getLength();
+        $position = $buffer->getPosition();
+        if (count($this->tokens) > 0) {
+            $totalLen = max($length - $this->maxLen, 1);
+            for ($i = 0; $i < $totalLen; $i++) {
+                foreach ($this->keyLengths as $len) {
+                    $buf = substr($contents, $i, $len);
+                    if (isset($this->tokens[$buf])) {
+                        if ($i > 0) {
+                            return [
+                                [Token::T_CONTENT, substr($contents, 0, $i), $position, $i],
+                                [$this->tokens[$buf], $buf, $position + $i, $len],
+                            ];
+                        } else {
+                            return [[$this->tokens[$buf], $buf, $position, $len]];
+                        }
+                    }
+                }
+                if ($totalLen !== $length && $i == $totalLen - 1) {
+                    $buffer->read();
+                    $totalLen = $length = $buffer->getLength();
+                    $contents = $buffer->getContents();
+                }
             }
         }
 
-        return new Token(Token::T_CONTENT, $buffer[0], $position);
+        return [[Token::T_CONTENT, $contents[0], $buffer->getPosition(), 1]];
     }
 }

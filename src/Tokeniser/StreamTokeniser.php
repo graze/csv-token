@@ -13,38 +13,42 @@
 
 namespace Graze\CsvToken\Tokeniser;
 
+use Graze\CsvToken\Buffer\StreamBuffer;
 use Graze\CsvToken\Csv\Bom;
 use Graze\CsvToken\Csv\CsvConfigurationInterface;
 use Graze\CsvToken\Tokeniser\Token\Token;
 use Graze\CsvToken\Tokeniser\Token\TokenStore;
 use Iterator;
-use Psr\Http\Message\StreamInterface;
 
 class StreamTokeniser implements TokeniserInterface
 {
     use StateBuilder;
 
+    const BUFFER_SIZE = 128;
+
     /** @var int */
-    private $maxTypeLength;
-    /** @var StreamInterface */
+    private $minLength;
+    /** @var resource */
     private $stream;
     /** @var State */
     private $state;
     /** @var TokenStore */
     private $tokenStore;
+    /** @var StreamBuffer */
+    private $buffer;
 
     /**
      * Tokeniser constructor.
      *
      * @param CsvConfigurationInterface $config
-     * @param StreamInterface           $stream
+     * @param resource                  $stream
      */
-    public function __construct(CsvConfigurationInterface $config, StreamInterface $stream)
+    public function __construct(CsvConfigurationInterface $config, $stream)
     {
         $this->tokenStore = new TokenStore($config);
         $this->state = $this->buildStates($this->tokenStore);
         $types = $this->tokenStore->getTokens();
-        $this->maxTypeLength = count($types) > 0 ? strlen(array_keys($types)[0]) : 1;
+        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) * 2 : 1;
         $this->stream = $stream;
     }
 
@@ -56,51 +60,57 @@ class StreamTokeniser implements TokeniserInterface
      */
     public function getTokens()
     {
-        $this->stream->rewind();
-        $position = $this->stream->tell();
-        $buffer = $this->stream->read($this->maxTypeLength);
+        fseek($this->stream, 0);
+        $this->buffer = new StreamBuffer($this->stream, static::BUFFER_SIZE, $this->minLength);
+        $this->buffer->read();
 
         /** @var Token $last */
         $last = null;
 
-        while (strlen($buffer) > 0) {
-            $token = $this->state->match($position, $buffer);
-
-            if ($token->getType() == Token::T_BOM) {
-                $this->changeEncoding($token);
-            }
-
-            $this->state = $this->state->getNextState($token->getType());
-
-            $len = $token->getLength();
-
-            // merge tokens together to condense T_CONTENT tokens
-            if ($token->getType() == Token::T_CONTENT) {
-                $last = (!is_null($last)) ? $last->addContent($token->getContent()) : $token;
-            } else {
-                if (!is_null($last)) {
-                    yield $last;
-                    $last = null;
+        while (!$this->buffer->isEof()) {
+            foreach ($this->state->match($this->buffer) as $token) {
+                if ($token[0] == Token::T_BOM) {
+                    $this->changeEncoding($token[1]);
                 }
-                yield $token;
-            }
 
-            $position += $len;
-            $buffer = substr($buffer, $len) . $this->stream->read($len);
+                $this->state = $this->state->getNextState($token[0]);
+
+                // merge tokens together to condense T_CONTENT tokens
+                if ($token[0] == Token::T_CONTENT) {
+                    if (!is_null($last)) {
+                        $last[1] .= $token[1];
+                        $last[3] = strlen($last[1]);
+                    } else {
+                        $last = $token;
+                    }
+                } else {
+                    if (!is_null($last)) {
+                        yield $last;
+                        $last = null;
+                    }
+                    yield $token;
+                }
+
+                $this->buffer->move($token[3]);
+                $this->buffer->read();
+            }
         }
 
         if (!is_null($last)) {
             yield $last;
         }
 
-        $this->stream->close();
+        fclose($this->stream);
     }
 
     /**
-     * @param Token $token
+     * @param string $content
      */
-    private function changeEncoding(Token $token)
+    private function changeEncoding($content)
     {
-        $this->tokenStore->setEncoding(Bom::getEncoding($token->getContent()));
+        $this->tokenStore->setEncoding(Bom::getEncoding($content));
+        $types = $this->tokenStore->getTokens();
+        $this->minLength = count($types) > 0 ? strlen(array_keys($types)[0]) * 2 : 1;
+        $this->buffer->setMinBufferSize($this->minLength);
     }
 }

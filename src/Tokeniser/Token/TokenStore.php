@@ -6,7 +6,7 @@ use Graze\CsvToken\Csv\CsvConfigurationInterface;
 
 class TokenStore implements TokenStoreInterface
 {
-    /** @var array[] */
+    /** @var int[][] */
     private $maskStore = [];
     /** @var int[] */
     private $tokens = [];
@@ -28,7 +28,7 @@ class TokenStore implements TokenStoreInterface
     /**
      * @param int $mask
      *
-     * @return array
+     * @return int[]
      */
     public function getTokens($mask = Token::T_ANY)
     {
@@ -115,5 +115,17 @@ class TokenStore implements TokenStoreInterface
         uksort($this->tokens, function ($first, $second) {
             return strlen($second) - strlen($first);
         });
+    }
+
+    /**
+     * Determine if a mask set of tokens has changed
+     *
+     * @param int $mask
+     *
+     * @return bool
+     */
+    public function hasChanged($mask = Token::T_ANY)
+    {
+        return !isset($this->maskStore[$mask]);
     }
 }

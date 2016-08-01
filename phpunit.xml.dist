@@ -16,6 +16,13 @@
         <testsuite name="integration">
             <directory>tests/integration</directory>
         </testsuite>
+        <testsuite name="performance">
+            <directory>tests/performance</directory>
+        </testsuite>
+        <testsuite name="coverage">
+            <directory>tests/unit</directory>
+            <directory>tests/integration</directory>
+        </testsuite>
     </testsuites>
     <filter>
         <whitelist>
