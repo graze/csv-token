@@ -10,7 +10,8 @@ before_script:
 
 script:
   - vendor/bin/phpcs -p --warning-severity=0 src/ tests/
-  - vendor/bin/phpunit --coverage-clover=./tests/report/coverage.clover
+  - vendor/bin/phpunit --coverage-clover=./tests/report/coverage.clover --testsuite=coverage
+  - vendor/bin/phpunit --testsuite=performance
 
 after_script:
   - ./build/coverage_to_scruitinizer.sh
