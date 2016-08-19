@@ -38,7 +38,7 @@ class Parser implements ParserInterface
     /**
      * @param Iterator $tokens
      *
-     * @return Iterator Iterator of csv line Iterators
+     * @return Iterator Iterator of csv line arrays
      */
     public function parse(Iterator $tokens)
     {

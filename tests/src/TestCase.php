@@ -15,4 +15,16 @@ namespace Graze\CsvToken\Test;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @param string $string
+     *
+     * @return resource
+     */
+    protected function getStream($string)
+    {
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, $string);
+        rewind($stream);
+        return $stream;
+    }
 }
