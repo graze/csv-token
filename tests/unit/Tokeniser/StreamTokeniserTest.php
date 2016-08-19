@@ -54,19 +54,6 @@ class StreamTokeniserTest extends TestCase
     }
 
     /**
-     * @param string $string
-     *
-     * @return resource
-     */
-    private function getStream($string)
-    {
-        $stream = fopen('php://memory', 'r+');
-        fwrite($stream, $string);
-        rewind($stream);
-        return $stream;
-    }
-
-    /**
      * @return array
      */
     public function tokeniserTestData()
