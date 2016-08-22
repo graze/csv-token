@@ -1,10 +1,10 @@
-FROM graze/stats:7.0
+FROM graze/php-alpine
 
 RUN apk add --no-cache --repository "http://dl-cdn.alpinelinux.org/alpine/edge/testing" \
     php7-xdebug
 
-ADD . /opt/graze/csv-token
+ADD . /srv
 
-WORKDIR /opt/graze/csv-token
+WORKDIR /srv
 
 CMD /bin/sh
