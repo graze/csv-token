@@ -16,6 +16,7 @@ Tokenised Csv Reader that handles some of the strange configurations databases a
 | Delimiter                    | `thing|other`              | `['thing','other']`           |
 | Quote Enclosure              | `"quote, here",not here`   | `['quote, here', 'not here']` |
 | Escaping                     | `"\"text","new\\nline"`    | `['"text',"new\\\nline"]`     |
+| Double Quotes                | `"""text","more"`          | `['"text','more']`            |
 | Double Quotes and Escaping   | `"""text","\, text"`       | `['"text',', text']`          |
 | Null value parsing           | `"text",\\N,"text"`        | `['text',null,'text']`        |
 | Boolean value parsing        | `"text",false,true`        | `['text',false,true]`         |
@@ -32,11 +33,25 @@ $ composer require graze/csv-token
 
 ## Usage
 
-``` php
+#### Simple reader
+
+```php
+$csvDefinition = new CsvDefinition();
+$reader = new Reader($csvDefinition, $stream);
+$iterator = $reader->read();
+```
+
+#### More advanced parsing (with value parsers)
+
+```php
+// $stream = '"some","text",true,false,0,1,2';
 $csvDefiniton = new CsvDefinition();
-$parser = new Parser();
+$parser = new Parser([new BoolValueParser(), new NumberValueParser()]);
 $tokeniser = new StreamTokeniser($csvDefinition, $stream);
-$csvIterator = $parser->parser($tokeniser->getTokens());
+$iterator = $parser->parser($tokeniser->getTokens());
+
+var_dump(iterator_to_array($iterator));
+-> [['some','text',true,false,0,1,2]]
 ```
 
 ## Change log
